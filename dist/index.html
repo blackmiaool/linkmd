@@ -2,16 +2,44 @@
 <html>
 
 <head>
-    <title>科协浮生记</title>
+    <title>linkmd</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="js/poli.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.mobile-1.4.5.min.js"></script>
+    <script src="js/react.min.js"></script>
+    <script src="js/underscore.js"></script>
+    <script src="js/markd.min.js"></script>
+    <script src="js/simplemde.min.js"></script>
+    
+    <script src="js/util.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/simplemde.min.css">
 </head>
 
 <body ng-controller="RootController" ng-cloak>
+   <h1-a style="position:fixed;top:0;left:0;right:0;">slkdjf</h1-a>
     <div id="wrap">
+        <div id="article-wrap">
+            <article>
+            </article>
+        </div>
+        <div class="mask">
+          <div class="bg"></div>
+           <div class="editor">
+                <textarea>
 
+            </textarea>
+           </div>
+           
+        </div>
     </div>
+
+    <script type="riot/tag" src="pad.tag"></script>
+    <script src="js/riot+compiler.min.js"></script>
+    <script src="js/index.js"></script>
     <script src="http://192.168.199.128:35729/livereload.js?ext=Chrome&extver=2.1.0"></script>
 </body>
 

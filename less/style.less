@@ -1,0 +1,79 @@
+@import "mixin.less";
+#article-wrap {
+    max-width: 960px;
+    margin: auto;
+//    overflow-y: auto;
+//    overflow-x: visible;
+    .abs-fill;
+    >article {}
+}
+
+article {
+    position: relative;
+    overflow: visible;
+}
+
+pad {
+    display: block;
+    //    overflow: auto;
+    position: relative;
+    >.hovering-tools {
+        .abs-fill;
+        left: -30px;
+        top: -5px;
+        right: -5px;
+        bottom: -5px;
+        display: none;
+        >span {
+            .clickable;
+            &:hover {
+                color: steelblue;
+            }
+        }
+        [data-tool="edit"] {
+            .square(15px);
+            position: absolute;
+            left: 5px;
+            top: 5px;
+        }
+    }
+    &.hovering {
+        background-color: antiquewhite;
+        >.hovering-tools {
+            display: block;
+        }
+    }
+}
+
+#wrap>.mask {
+    .abs-fill;
+    position: fixed;
+    display: none;
+    background-color: rgba(100, 100, 100, 0.5);
+    &.active {
+        display: block;
+    }
+    >.bg {
+        .abs-fill;
+    }
+    >.editor {
+        textarea{
+            display: none;
+        }
+        .transfrom-center;
+        width: 90%;
+        height: 90%;
+        
+        >.editor-toolbar{
+            background-color: white;  
+            opacity: 1;
+        }
+        .CodeMirror-wrap{
+            position: absolute;
+            bottom: 0;
+            left: 1px;
+            right: 1px;
+            top: 49px;
+        }
+    }
+}

@@ -38,6 +38,11 @@ gulp.task('html', function () {
         .pipe(cached("html"))
         .pipe(gulp.dest('dist/')).pipe(livereload());
 })
+gulp.task('tag', function () {
+    return gulp.src(['tag/**/*.tag'])
+        .pipe(cached("tag"))
+        .pipe(gulp.dest('dist/')).pipe(livereload());
+})
 var less = require('gulp-less');
 gulp.task('less', function () {
 
@@ -60,6 +65,10 @@ gulp.task('less', function () {
 });
 
 gulp.task('mv-dist',  function () {
+    gulp.src('libs/css/**/*')
+        .pipe(gulp.dest('dist/css'));
+    gulp.src('libs/fonts/**/*')
+        .pipe(gulp.dest('dist/fonts'))
     return gulp.src('libs/js/**/*')
         .pipe(gulp.dest('dist/js'));
 });
@@ -88,7 +97,7 @@ gulp.task('es6', function () {
 //})
 gulp.task('default', function () {
 
-    gulp.start(["mv-dist", "less", "html", "es6"]);
+    gulp.start(["mv-dist", "tag","less", "html", "es6"]);
 
 });
 gulp.task('reload', function () {
@@ -103,4 +112,5 @@ gulp.watch('less/**/*.less', ['less']);
 gulp.watch(['js/**/*.js'], ['es6']);
 gulp.watch('index.html', ['reload']);
 gulp.watch('html/**/*.html', ['html']);
+gulp.watch('tag/**/*.tag', ['tag']);
 //gulp.watch('res/**/*.*', ['mv-res', 'reload'])
