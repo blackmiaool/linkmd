@@ -107,9 +107,21 @@ img {
   bottom: 0;
   margin: auto;
 }
+#article-wrap > .edit-btn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  font-size: 20px;
+}
+#article-wrap > .edit-btn:hover {
+  color: steelblue;
+}
 article {
   position: relative;
   overflow: visible;
+}
+.mobile .hovering-tools {
+  display: none !important;
 }
 pad {
   display: block;

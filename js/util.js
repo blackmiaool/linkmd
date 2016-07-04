@@ -1,8 +1,12 @@
 let ajaxUrl = "http://localhost";
 let ua = UATest(navigator.userAgent);
+let padid;
+let args;
+let simplemde;
+let $mask = $("#wrap>.mask");
 let testArticleData = {
     root: `# root
-[google](http://www.google.com)
+[test1](/?padid=test1)
 ### test1:
 <pad padid="test1"></pad>
 
@@ -11,6 +15,9 @@ let testArticleData = {
 <pad padid="test2"></pad>`,
     test1: `## test1's title
 #### test1's content
+[google](http://www.google.com)
+[root](/)
+[test2](/?padid=test2)
 <pad padid="test2"/>
 <pad padid="test2"/>
 `,
@@ -77,13 +84,14 @@ function UATest(uaText) {
         pc,
     };
 }
-function maskInit(){
+
+function maskInit() {
     let $mask = $("#wrap>.mask");
-    $mask.find(">.bg").on("tap",function(){
-        console.log(123);
+    $mask.find(">.bg").on("tap", function () {
         $mask.removeClass("active");
     })
 }
+
 function jqInit() {
     if (ua.pc) {
         var on = $.fn.on;
@@ -102,9 +110,53 @@ function jqInit() {
             }
             return off.apply(this, args);
         }
-    }else{
-        (function($){
+    } else {
+        tapEventSupport();
+    }
 
+}
+
+function linkProxyInit() {
+    if (ua.iOS) {
+        $(document.body).on("tap","a",bodyClick);
+    } else {
+        $(document.body).on("click","a",bodyClick);
+    }
+}
+
+function articleInit() {
+    args = parseURL(location.href).params;
+    padid = args.padid || "root";
+    getArticle(padid, (data) => {
+        renderArticle($("article"), data)
+    });
+    let $mask = $("#wrap>.mask");
+    $mask.removeClass("active");
+}
+
+function pushPage(url) {
+    if (window.history.pushState) {
+        window.history.pushState({}, {}, url)
+        articleInit();
+    } else {
+        window.location.href = url;
+    }
+}
+
+function bodyClick(e) {
+    let href = $(e.target).attr("href");
+    let urlObj = parseURL(href);
+    if (urlObj.host === location.hostname) {
+        e.preventDefault();
+        e.stopPropagation();
+        pushPage(href);
+    } else {
+
+    }
+
+}
+
+function tapEventSupport() {// code from https://github.com/avinoamr/jquery.taps/blob/master/jquery.taps.js
     var THRESHOLD_DBL = 500;
     var THRESHOLD_LONG = 600;
     var elems = 0,
@@ -112,26 +164,26 @@ function jqInit() {
         last,
         timeout;
 
-    $.event.special.tap = 
-    $.event.special.dbltap = 
-    $.event.special.longtap = {
-        setup: function() {
-            if (++elems === 1) {
-                $(document).bind('touchstart', touch_start);
-                $(document).bind('touchend', touch_end);
+    $.event.special.tap =
+        $.event.special.dbltap =
+        $.event.special.longtap = {
+            setup: function () {
+                if (++elems === 1) {
+                    $(document).bind('touchstart', touch_start);
+                    $(document).bind('touchend', touch_end);
+                }
+            },
+            teardown: function () {
+                if (--elems === 0) {
+                    $(document).unbind('touchstart', touch_end);
+                    $(document).bind('touchend', touch_end);
+                }
             }
-        },
-        teardown: function() {
-            if (--elems === 0) {
-                $(document).unbind('touchstart', touch_end);
-                $(document).bind('touchend', touch_end);
-            }
-        }
-    };
-    
-    var touch_start = function(ev) {
+        };
+
+    var touch_start = function (ev) {
         last = ev;
-        timeout = setTimeout(function() {
+        timeout = setTimeout(function () {
             clicks = 0;
             touch_move();
             $(ev.target).trigger('longtap');
@@ -139,7 +191,7 @@ function jqInit() {
         $(document).one('touchmove', touch_move);
     };
 
-    var touch_end = function(ev) {
+    var touch_end = function (ev) {
         if (last) {
             var elem = $(ev.target);
             if (ev.timeStamp - last.timeStamp > THRESHOLD_DBL) {
@@ -155,16 +207,11 @@ function jqInit() {
         touch_move();
     };
 
-    var touch_move = function() {
+    var touch_move = function () {
         last = null;
         $(document).unbind('touchmove', touch_move);
         timeout = clearTimeout(timeout);
     };
-
-})(jQuery);
-    }
-    
-
 }
 
 function renderArticle($dom, data) {
@@ -185,24 +232,16 @@ function getArticle(id, cb) {
 }
 
 function edit(id) {
-    //    let simplemde = new SimpleMDE({
-    //        element: $(".mask>.editor")[0]
-    //    });
-    let $mask = $("#wrap>.mask");
-    console.log($("#wrap>.mask"))
-    $mask.addClass("active");
-    let $editor = $mask.find(".editor textarea");
-    console.log($editor);
-    $editor.siblings().remove();
-    let simplemde = new SimpleMDE({
-        element: $editor[0]
-    });
-    
+    $mask.addClass("active");    
     simplemde.value(idMap[id]);
 }
-
+function editorInit(){
+    let $editor = $mask.find(".editor textarea");
+    simplemde = new SimpleMDE({
+        element: $editor[0]
+    });
+}
 function toolCb(toolName, id) {
-    console.log(toolName)
     switch (toolName) {
     case "edit":
         edit(id);

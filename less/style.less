@@ -6,13 +6,27 @@
 //    overflow-x: visible;
     .abs-fill;
     >article {}
+    >.edit-btn{
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        font-size: 20px;
+        &:hover{
+            color: steelblue;
+        }
+    }
 }
 
 article {
     position: relative;
     overflow: visible;
 }
-
+.mobile{
+    .hovering-tools{
+        display: none !important;
+        
+    }
+}
 pad {
     display: block;
     //    overflow: auto;

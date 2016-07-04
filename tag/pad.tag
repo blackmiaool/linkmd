@@ -14,11 +14,10 @@
             getArticle(opts.padid, (data) => {
                 renderArticle($article, data);
                 let $pad = $article.parent("pad");
-                $article.on("taphold", function (e) {
-                    alert("long");
-                })
                 $article.on("longtap", function (e) {
-                    alert("long2");
+                    if($(this).parent().hasClass("hovering")){
+                        toolCb("edit",opts.padid);    
+                    }                    
                 })
                 $article.on("mouseover", function (e) {
                     let $target = $(e.target);

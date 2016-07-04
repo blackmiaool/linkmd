@@ -1,12 +1,23 @@
 "use strict";
 
 (function () {
-    var args = parseURL(location.href);
-    var padid = args.padid || "root";
+    if (!ua.pc) {
+        $(document.body).addClass("mobile");
+    }
     jqInit();
+    linkProxyInit();
     maskInit();
     markedInit();
-    getArticle(padid, function (data) {
-        renderArticle($("article"), data);
+    editorInit();
+    $("#article-wrap>.edit-btn").on("tap", function () {
+        toolCb("edit", padid);
     });
+
+    function initRoute() {
+        setTimeout(function () {
+            window.addEventListener("popstate", articleInit);
+            articleInit();
+        });
+    }
+    initRoute();
 })();

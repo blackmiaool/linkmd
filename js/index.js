@@ -1,8 +1,21 @@
-(function(){    
-    let args=parseURL(location.href);
-    let padid=args.padid||"root";
+(function () {
+    if (!ua.pc) {
+        $(document.body).addClass("mobile");
+    }
     jqInit();
+    linkProxyInit();
     maskInit();
     markedInit();
-    getArticle(padid,(data)=>{renderArticle($("article"),data)});
+    editorInit();
+    $("#article-wrap>.edit-btn").on("tap", function () {
+        toolCb("edit", padid);
+    })
+    
+    function initRoute() {
+        setTimeout(function () {
+            window.addEventListener("popstate", articleInit);
+            articleInit();
+        });
+    }
+    initRoute();
 })()

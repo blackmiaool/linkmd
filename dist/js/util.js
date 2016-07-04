@@ -2,9 +2,13 @@
 
 var ajaxUrl = "http://localhost";
 var ua = UATest(navigator.userAgent);
+var padid = void 0;
+var args = void 0;
+var simplemde = void 0;
+var $mask = $("#wrap>.mask");
 var testArticleData = {
-    root: "# root\n[google](http://www.google.com)\n### test1:\n<pad padid=\"test1\"></pad>\n\n\n### test2:\n<pad padid=\"test2\"></pad>",
-    test1: "## test1's title\n#### test1's content\n<pad padid=\"test2\"/>\n<pad padid=\"test2\"/>\n",
+    root: "# root\n[test1](/?padid=test1)\n### test1:\n<pad padid=\"test1\"></pad>\n\n\n### test2:\n<pad padid=\"test2\"></pad>",
+    test1: "## test1's title\n#### test1's content\n[google](http://www.google.com)\n[root](/)\n[test2](/?padid=test2)\n<pad padid=\"test2\"/>\n<pad padid=\"test2\"/>\n",
     test2: "## test2's title\n#### test2 content\n"
 };
 var idMap = {};
@@ -65,13 +69,14 @@ function UATest(uaText) {
         pc: pc
     };
 }
+
 function maskInit() {
     var $mask = $("#wrap>.mask");
     $mask.find(">.bg").on("tap", function () {
-        console.log(123);
         $mask.removeClass("active");
     });
 }
+
 function jqInit() {
     if (ua.pc) {
         var on = $.fn.on;
@@ -91,63 +96,102 @@ function jqInit() {
             return off.apply(this, args);
         };
     } else {
-        (function ($) {
-
-            var THRESHOLD_DBL = 500;
-            var THRESHOLD_LONG = 600;
-            var elems = 0,
-                clicks = 0,
-                last,
-                timeout;
-
-            $.event.special.tap = $.event.special.dbltap = $.event.special.longtap = {
-                setup: function setup() {
-                    if (++elems === 1) {
-                        $(document).bind('touchstart', touch_start);
-                        $(document).bind('touchend', touch_end);
-                    }
-                },
-                teardown: function teardown() {
-                    if (--elems === 0) {
-                        $(document).unbind('touchstart', touch_end);
-                        $(document).bind('touchend', touch_end);
-                    }
-                }
-            };
-
-            var touch_start = function touch_start(ev) {
-                last = ev;
-                timeout = setTimeout(function () {
-                    clicks = 0;
-                    touch_move();
-                    $(ev.target).trigger('longtap');
-                }, THRESHOLD_LONG);
-                $(document).one('touchmove', touch_move);
-            };
-
-            var touch_end = function touch_end(ev) {
-                if (last) {
-                    var elem = $(ev.target);
-                    if (ev.timeStamp - last.timeStamp > THRESHOLD_DBL) {
-                        clicks = 0;
-                    }
-                    clicks += 1;
-                    elem.trigger('tap');
-                    if (clicks == 2) {
-                        elem.trigger('dbltap');
-                        clicks = 0;
-                    }
-                }
-                touch_move();
-            };
-
-            var touch_move = function touch_move() {
-                last = null;
-                $(document).unbind('touchmove', touch_move);
-                timeout = clearTimeout(timeout);
-            };
-        })(jQuery);
+        tapEventSupport();
     }
+}
+
+function linkProxyInit() {
+    if (ua.iOS) {
+        $(document.body).on("tap", "a", bodyClick);
+    } else {
+        $(document.body).on("click", "a", bodyClick);
+    }
+}
+
+function articleInit() {
+    args = parseURL(location.href).params;
+    padid = args.padid || "root";
+    getArticle(padid, function (data) {
+        renderArticle($("article"), data);
+    });
+    var $mask = $("#wrap>.mask");
+    $mask.removeClass("active");
+}
+
+function pushPage(url) {
+    if (window.history.pushState) {
+        window.history.pushState({}, {}, url);
+        articleInit();
+    } else {
+        window.location.href = url;
+    }
+}
+
+function bodyClick(e) {
+    var href = $(e.target).attr("href");
+    var urlObj = parseURL(href);
+    if (urlObj.host === location.hostname) {
+        e.preventDefault();
+        e.stopPropagation();
+        pushPage(href);
+    } else {}
+}
+
+function tapEventSupport() {
+    // code from https://github.com/avinoamr/jquery.taps/blob/master/jquery.taps.js
+    var THRESHOLD_DBL = 500;
+    var THRESHOLD_LONG = 600;
+    var elems = 0,
+        clicks = 0,
+        last,
+        timeout;
+
+    $.event.special.tap = $.event.special.dbltap = $.event.special.longtap = {
+        setup: function setup() {
+            if (++elems === 1) {
+                $(document).bind('touchstart', touch_start);
+                $(document).bind('touchend', touch_end);
+            }
+        },
+        teardown: function teardown() {
+            if (--elems === 0) {
+                $(document).unbind('touchstart', touch_end);
+                $(document).bind('touchend', touch_end);
+            }
+        }
+    };
+
+    var touch_start = function touch_start(ev) {
+        last = ev;
+        timeout = setTimeout(function () {
+            clicks = 0;
+            touch_move();
+            $(ev.target).trigger('longtap');
+        }, THRESHOLD_LONG);
+        $(document).one('touchmove', touch_move);
+    };
+
+    var touch_end = function touch_end(ev) {
+        if (last) {
+            var elem = $(ev.target);
+            if (ev.timeStamp - last.timeStamp > THRESHOLD_DBL) {
+                clicks = 0;
+            }
+            clicks += 1;
+            elem.trigger('tap');
+            if (clicks == 2) {
+                elem.trigger('dbltap');
+                clicks = 0;
+            }
+        }
+        touch_move();
+    };
+
+    var touch_move = function touch_move() {
+        last = null;
+        $(document).unbind('touchmove', touch_move);
+        timeout = clearTimeout(timeout);
+    };
 }
 
 function renderArticle($dom, data) {
@@ -168,24 +212,16 @@ function getArticle(id, cb) {
 }
 
 function edit(id) {
-    //    let simplemde = new SimpleMDE({
-    //        element: $(".mask>.editor")[0]
-    //    });
-    var $mask = $("#wrap>.mask");
-    console.log($("#wrap>.mask"));
     $mask.addClass("active");
-    var $editor = $mask.find(".editor textarea");
-    console.log($editor);
-    $editor.siblings().remove();
-    var simplemde = new SimpleMDE({
-        element: $editor[0]
-    });
-
     simplemde.value(idMap[id]);
 }
-
+function editorInit() {
+    var $editor = $mask.find(".editor textarea");
+    simplemde = new SimpleMDE({
+        element: $editor[0]
+    });
+}
 function toolCb(toolName, id) {
-    console.log(toolName);
     switch (toolName) {
         case "edit":
             edit(id);
