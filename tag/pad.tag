@@ -21,6 +21,9 @@
                 })
                 $article.on("mouseover", function (e) {
                     let $target = $(e.target);
+                    if(e.target.tagName==="A"){
+                        return;
+                    }
                     //                    console.log($article[0],e.target,$article[0]==e.target,e.target.tagName);
                     if ($article[0] == e.target || $article[0] == $target.parent("article")[0]) {
                         $("pad").removeClass("hovering");
@@ -32,6 +35,7 @@
                     }
                 })
                 $tools.on("mouseleave", function (e) {
+                    
                         $pad.removeClass("hovering");
                     })
                     //                $article.on("mouseleave",function(e){
