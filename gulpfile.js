@@ -1,24 +1,12 @@
 var gulp = require('gulp');
 
 var path = require('path');
-var replace = require('gulp-replace')
 var livereload = require('gulp-livereload');
-var _ = require('underscore');
 
-var fs = require("fs");
-var shell = require('gulp-shell')
-var node_less = require('less');
 
-var copy = require('gulp-copy');
-var concat = require("gulp-concat");
-var md2json = require("gulp-markdown-table-to-json");
-
-var rename = require("gulp-rename");
 var cached = require("gulp-cached")
 var gutil = require('gulp-util');
 var injectfile = require('gulp-inject-file')
-var headerfooter = require('gulp-header-footer');
-var merge = require('merge-stream');
 var babel = require('gulp-babel');
 
 function get_babel_params() {
